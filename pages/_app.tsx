@@ -9,12 +9,14 @@ import theme from '../styles/mainTheme/theme';
 import { SessionProvider } from "next-auth/react"
 import createEmotionCache from '../infra/createEmotionCache';
 import '../styles/globals.css'
+import main from './api/event';
 
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
 export default function MyApp(props: any) {
+  main();
   const { Component, emotionCache = clientSideEmotionCache, session, pageProps } = props;
 
   return (

@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "styles/mainTheme/theme.js", "pages/_document.js", "pages/_document.tjs"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "styles/mainTheme/theme.js", "pages/_document.js", "pages/_document.tjs", "pages/api/event.js"],
   "exclude": ["node_modules"]
 }
