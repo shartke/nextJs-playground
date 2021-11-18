@@ -1,33 +1,48 @@
-import { MongoClient, MongoClientOptions } from 'mongodb'
+import { MongoClient, MongoClientOptions, Db } from 'mongodb';
 
-const uri = process.env.MONGO_CONNECTION ;
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB = process.env.DB_NAME;
 
-const options = {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-} as MongoClientOptions
-
-let client
-var clientPromise: Promise<MongoClient>
-
-if (!process.env.MONGO_CONNECTION ) {
-  throw new Error('Please add your Mongo URI to .env.local')
+// check the MongoDB URI
+if (!MONGODB_URI) {
+    throw new Error('Define the MONGODB_URI environmental variable');
 }
 
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  if (!globalThis._mongoClientPromise) {
-    client = new MongoClient(uri!, options)
-    globalThis._mongoClientPromise = client.connect()
-  }
-  clientPromise = global._mongoClientPromise
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri!, options)
-  clientPromise = client.connect()
+// check the MongoDB DB
+if (!MONGODB_DB) {
+    throw new Error('Define the MONGODB_DB environmental variable');
 }
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-export default clientPromise
+let cachedClient:MongoClient;
+let cachedDb : Db
+
+export async function connectToDatabase() {
+    // check the cached.
+    if (cachedClient && cachedDb) {
+        // load from cache
+        return {
+            client: cachedClient,
+            db: cachedDb,
+        };
+    }
+
+    // set the connection options
+    const opts = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    } as MongoClientOptions
+
+    // Connect to cluster
+    let client = new MongoClient(MONGODB_URI!, opts);
+    await client.connect();
+    let db = client.db(MONGODB_DB);
+
+    // set cache
+    cachedClient = client;
+    cachedDb = db;
+
+    return {
+        client: cachedClient,
+        db: cachedDb,
+    };
+}
